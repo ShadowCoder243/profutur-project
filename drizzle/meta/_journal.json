@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1770196780798,
+      "tag": "0000_ordinary_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1770196839915,
+      "tag": "0001_fresh_boomerang",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1770196956884,
+      "tag": "0002_dapper_ben_urich",
+      "breakpoints": true
+    }
+  ]
+}
