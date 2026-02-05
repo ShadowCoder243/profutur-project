@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth, RegisterData } from '@/contexts/AuthContext';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { useLocation } from 'wouter';
 import { Mail, Lock, User, Building2, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 type Role = 'student' | 'center' | 'ambassador';
 
@@ -21,7 +23,10 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [, setLocation] = useLocation();
-  const { register, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const createStudentProfile = trpc.authProfile.createStudentProfile.useMutation();
+  const createCenterProfile = trpc.authProfile.createCenterProfile.useMutation();
+  const createAmbassadorProfile = trpc.authProfile.createAmbassadorProfile.useMutation();
 
   const roles = [
     {
@@ -51,25 +56,33 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
-      return;
-    }
-
     try {
-      const registerPayload: RegisterData = {
-        email: formData.email,
-        password: formData.password,
-        fullName: formData.fullName,
-        role: selectedRole,
-        ...(selectedRole === 'center' && { centerName: formData.centerName }),
-        ...(selectedRole === 'student' && { specialization: formData.specialization }),
-      };
+      if (selectedRole === 'student') {
+        await createStudentProfile.mutateAsync({
+          specialization: formData.specialization,
+          bio: '',
+        });
+        toast.success('Profil étudiant créé!');
+      } else if (selectedRole === 'center') {
+        await createCenterProfile.mutateAsync({
+          centerName: formData.centerName,
+          description: '',
+          location: '',
+          phone: '',
+          website: '',
+        });
+        toast.success('Profil centre créé!');
+      } else if (selectedRole === 'ambassador') {
+        await createAmbassadorProfile.mutateAsync();
+        toast.success('Profil ambassadeur créé!');
+      }
 
-      await register(registerPayload);
-      setLocation('/dashboard');
+      setTimeout(() => {
+        setLocation('/dashboard');
+      }, 1500);
     } catch (err) {
-      setError('Erreur lors de l\'inscription');
+      setError('Erreur lors de la création du profil');
+      toast.error('Erreur lors de la création du profil');
     }
   };
 
@@ -291,13 +304,13 @@ export default function Register() {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={loading}
+              disabled={createStudentProfile.isPending || createCenterProfile.isPending || createAmbassadorProfile.isPending}
               className="w-full bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-800 hover:to-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transform transition active:scale-95 disabled:opacity-50 mt-6"
             >
-              {loading ? (
+              {createStudentProfile.isPending || createCenterProfile.isPending || createAmbassadorProfile.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Inscription en cours...
+                  Création en cours...
                 </>
               ) : (
                 'Créer mon compte'
