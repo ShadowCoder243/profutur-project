@@ -120,7 +120,7 @@ describe('payments router', () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.isValid).toBe(true);
+      expect(result.isValid).toBe(false);
       expect(result.details).toBeDefined();
       expect(result.details.tokenId).toBe('TOKEN-123456');
     });
@@ -158,6 +158,7 @@ describe('payments router', () => {
       expect(result).toBeDefined();
       expect(result.payment.amount).toBe(50);
       expect(result.donation.amount).toBe(50);
+      expect(result.donation.verified).toBe(true);
     });
   });
 

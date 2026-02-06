@@ -106,6 +106,8 @@ export const certificates = mysqlTable("certificates", {
   issueDate: timestamp("issueDate").defaultNow().notNull(),
   expiryDate: timestamp("expiryDate"),
   verificationUrl: text("verificationUrl"),
+  tokenId: varchar("tokenId", { length: 255 }),
+  blockchainHash: varchar("blockchainHash", { length: 255 }),
 });
 
 /**
@@ -158,6 +160,40 @@ export const ambassadorProfiles = mysqlTable("ambassadorProfiles", {
 });
 
 /**
+ * Mobile Money Transactions - Payment records from mobile money providers
+ */
+export const mobileMoneyTransactions = mysqlTable("mobileMoneyTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  transactionId: varchar("transactionId", { length: 255 }).notNull().unique(),
+  provider: mysqlEnum("provider", ["orange", "vodacom", "airtel"]).notNull(),
+  phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD"),
+  status: mysqlEnum("status", ["pending", "completed", "failed"]).default("pending"),
+  description: text("description"),
+  metadata: longtext("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
+ * Blockchain Records - NFT certificates and donation records on blockchain
+ */
+export const blockchainRecords = mysqlTable("blockchainRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  recordType: mysqlEnum("recordType", ["certificate", "donation", "badge"]).notNull(),
+  relatedId: int("relatedId").notNull(),
+  tokenId: varchar("tokenId", { length: 255 }),
+  transactionHash: varchar("transactionHash", { length: 255 }).notNull().unique(),
+  network: varchar("network", { length: 50 }).default("hedera-testnet"),
+  metadata: longtext("metadata"),
+  verified: boolean("verified").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
  * Transactions - All financial transactions
  */
 export const transactions = mysqlTable("transactions", {
@@ -196,6 +232,12 @@ export type InsertStudentProfile = typeof studentProfiles.$inferInsert;
 
 export type AmbassadorProfile = typeof ambassadorProfiles.$inferSelect;
 export type InsertAmbassadorProfile = typeof ambassadorProfiles.$inferInsert;
+
+export type MobileMoneyTransaction = typeof mobileMoneyTransactions.$inferSelect;
+export type InsertMobileMoneyTransaction = typeof mobileMoneyTransactions.$inferInsert;
+
+export type BlockchainRecord = typeof blockchainRecords.$inferSelect;
+export type InsertBlockchainRecord = typeof blockchainRecords.$inferInsert;
 
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = typeof transactions.$inferInsert;

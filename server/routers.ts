@@ -7,6 +7,8 @@ import { profilesRouter } from "./routers/profiles";
 import { authRouter } from "./routers/auth";
 import { enrollmentsRouter } from "./routers/enrollments";
 import { paymentsRouter } from "./routers/payments";
+import { webhooksRouter } from "./routers/webhooks";
+import { enrollments } from "../drizzle/schema";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -28,6 +30,7 @@ export const appRouter = router({
   authProfile: authRouter,
   enrollments: enrollmentsRouter,
   payments: paymentsRouter,
+  webhooks: webhooksRouter,
 });
 
 export type AppRouter = typeof appRouter;
